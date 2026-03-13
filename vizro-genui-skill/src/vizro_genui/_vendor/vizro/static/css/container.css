@@ -1,0 +1,86 @@
+.container-fluid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+  overflow: auto;
+  padding: 0;
+}
+
+.container-fluid .figure-title {
+  font-size: 1rem;
+}
+
+.container-fluid:has(> .collapse:not(.show)) {
+  height: 60px; /* height of title (28px) + 2 x container padding (16px) */
+  overflow: hidden;
+}
+
+.container-title,
+.container-title-collapse {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container-title {
+  border-bottom: 1px solid var(--bs-border-color);
+  padding-bottom: 4px;
+}
+
+/* Hides title of the first container given the title is already reflected in the tab title */
+.tab-content .container-title:first-of-type {
+  display: none;
+}
+
+/* Change cursor for the whole container title when it's a collapsible container. */
+.container-title-collapse {
+  cursor: pointer;
+}
+
+.container-title-collapse .material-symbols-outlined {
+  color: var(--bs-body-color);
+}
+
+.container-title-collapse .material-symbols-outlined:hover {
+  color: var(--bs-primary-text-emphasis);
+}
+
+.collapsible-container {
+  flex: 1;
+  overflow: inherit;
+}
+
+.bg-container {
+  background: var(--bs-body-bg);
+}
+
+/* If a filled container is detected, then the right-bg color will change to
+the lighter shade, both in dark and light theme. */
+#right-side:has(.bg-container) {
+  background: var(--bs-tertiary-bg);
+}
+
+#right-side:has(.bg-container) .card {
+  background: var(--bs-tertiary-bg);
+}
+
+.inner-container-title {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.container-controls-panel {
+  border-bottom: 1px solid var(--bs-border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: start;
+  padding-bottom: 1rem;
+}
+
+.tab-content .container-controls-panel {
+  border-bottom: none;
+  padding-bottom: 0;
+}

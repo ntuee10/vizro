@@ -1,0 +1,139 @@
+from datetime import date
+from typing import Annotated, Any, Literal
+
+import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
+from dash import html
+from pydantic import AfterValidator, BeforeValidator, Field, PrivateAttr, model_validator
+from pydantic.json_schema import SkipJsonSchema
+
+from vizro.models import Tooltip, VizroBaseModel
+from vizro.models._components.form._form_utils import validate_date_picker_range, validate_max, validate_range_value
+from vizro.models._models_utils import (
+    _log_call,
+    make_actions_chain,
+    warn_description_without_title,
+)
+from vizro.models._tooltip import coerce_str_to_tooltip
+from vizro.models.types import ActionsType, _IdProperty
+
+
+class DatePicker(VizroBaseModel):
+    """Temporal single/range option selector.
+
+    Can be provided to [`Filter`][vizro.models.Filter] or [`Parameter`][vizro.models.Parameter].
+
+    Abstract: Usage documentation
+        [How to use temporal selectors](../user-guides/selectors.md#temporal-selectors)
+
+    """
+
+    type: Literal["date_picker"] = "date_picker"
+    min: date | None = Field(default=None, description="Start date for date picker.")
+    max: Annotated[
+        date | None, AfterValidator(validate_max), Field(default=None, description="End date for date picker.")
+    ]
+    value: Annotated[
+        list[date] | date | None,
+        # TODO[MS]: check here and similar if the early exit clause in below validator or similar is
+        # necessary given we don't validate on default
+        AfterValidator(validate_range_value),
+        Field(default=None, description="Default date/dates for date picker."),
+    ]
+    title: str = Field(default="", description="Title to be displayed.")
+    range: Annotated[
+        bool,
+        AfterValidator(validate_date_picker_range),
+        Field(default=True, description="Boolean flag for displaying range picker.", validate_default=True),
+    ]
+    # TODO: ideally description would have json_schema_input_type=str | Tooltip attached to the BeforeValidator,
+    #  but this requires pydantic >= 2.9.
+    description: Annotated[
+        Tooltip | None,
+        BeforeValidator(coerce_str_to_tooltip),
+        AfterValidator(warn_description_without_title),
+        Field(
+            default=None,
+            description="""Optional markdown string that adds an icon next to the title.
+            Hovering over the icon shows a tooltip with the provided description.""",
+        ),
+    ]
+    actions: ActionsType = []
+    extra: SkipJsonSchema[
+        Annotated[
+            dict[str, Any],
+            Field(
+                default={},
+                description="""Extra keyword arguments that are passed to `dmc.DatePickerInput` and overwrite
+any defaults chosen by the Vizro team. This may have unexpected behavior.
+Visit the [dmc documentation](https://www.dash-mantine-components.com/components/datepicker)
+to see all available arguments. [Not part of the official Vizro schema](../explanation/schema.md) and the
+underlying component may change in the future.""",
+            ),
+        ]
+    ]
+
+    _dynamic: bool = PrivateAttr(False)
+    _inner_component_properties: list[str] = PrivateAttr(dmc.DatePickerInput().available_properties)
+
+    @model_validator(mode="after")
+    def _make_actions_chain(self):
+        return make_actions_chain(self)
+
+    @property
+    def _action_triggers(self) -> dict[str, _IdProperty]:
+        return {"__default__": f"{self.id}.value"}
+
+    @property
+    def _action_outputs(self) -> dict[str, _IdProperty]:
+        return {
+            "__default__": f"{self.id}.value",
+            **({"title": f"{self.id}_title.children"} if self.title else {}),
+            **({"description": f"{self.description.id}-text.children"} if self.description else {}),
+        }
+
+    @property
+    def _action_inputs(self) -> dict[str, _IdProperty]:
+        return {"__default__": f"{self.id}.value"}
+
+    def __call__(self, min, max):
+        # TODO: Refactor value calculation logic after the Dash persistence bug is fixed and "Select All" PR is merged.
+        #  The underlying component's value calculation will need to account for:
+        #  - Changes introduced by Pydantic V2.
+        #  - The way how the new Vizro solution is built on top of the Dash persistence bugfix.
+        #  - Whether the current value is included in the updated options.
+        #  - The way how the validate_options_dict validator and tests are improved.
+        defaults = {
+            "id": self.id,
+            "minDate": min,
+            "value": self.value or ([min, max] if self.range else min),
+            "valueFormat": "MMM D, YYYY",
+            "maxDate": max,
+            "persistence": True,
+            "persistence_type": "session",
+            "type": "range" if self.range else "default",
+            "allowSingleDateInRange": True,
+            # Required for styling to remove gaps between cells
+            "withCellSpacing": False,
+        }
+        description = self.description.build().children if self.description else [None]
+        return html.Div(
+            children=[
+                dbc.Label(
+                    children=[html.Span(id=f"{self.id}_title", children=self.title), *description], html_for=self.id
+                )
+                if self.title
+                else None,
+                dmc.DatePickerInput(**(defaults | self.extra)),
+            ],
+        )
+
+    def _build_dynamic_placeholder(self):
+        if not self.value:
+            self.value = [self.min, self.max] if self.range else self.min  # type: ignore[list-item]
+
+        return self.__call__(self.min, self.max)
+
+    @_log_call
+    def build(self):
+        return self._build_dynamic_placeholder() if self._dynamic else self.__call__(self.min, self.max)

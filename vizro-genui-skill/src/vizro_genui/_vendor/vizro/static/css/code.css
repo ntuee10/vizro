@@ -1,0 +1,4 @@
+.hljs {
+  background: var(--bs-primary-bg-subtle);
+  color: unset;
+}

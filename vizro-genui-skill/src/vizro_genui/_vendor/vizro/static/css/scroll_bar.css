@@ -1,0 +1,20 @@
+::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+::-webkit-scrollbar-thumb,
+.ag-root ::-webkit-scrollbar-thumb {
+  background: var(--bs-tertiary-color);
+  border: none;
+}
+
+::-webkit-scrollbar-thumb:hover,
+.ag-root ::-webkit-scrollbar-thumb:hover {
+  background: var(--bs-secondary);
+}
+
+/* Removes the white square in the corner when an element has both vertical and horizontal scrollbars */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

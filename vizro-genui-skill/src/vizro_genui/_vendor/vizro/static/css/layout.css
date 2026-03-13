@@ -1,0 +1,390 @@
+.page-main-outer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+}
+
+#nav-control-panel {
+  align-items: flex-start;
+  border-right: 1px solid var(--bs-border-color);
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: auto;
+  padding: 20px 20px 0;
+  width: 280px;
+}
+
+#left-side {
+  background-color: var(--bs-tertiary-bg);
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+#right-side {
+  background: var(--bs-body-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow: auto;
+  padding: 20px;
+  width: 100%;
+}
+
+#page-header {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  height: 32px;
+  justify-content: space-between;
+}
+
+#header {
+  background-color: var(--bs-tertiary-bg);
+  display: flex;
+  height: 60px;
+  justify-content: space-between;
+  min-height: 0;
+  padding: 0 20px;
+}
+
+#header:not(:empty) {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+#header.no-left {
+  justify-content: flex-end;
+}
+
+#header-right,
+#header-left,
+#header-custom {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  height: 100%;
+  width: max-content;
+}
+
+#header-controls {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+#action-progress-indicator {
+  position: static !important;
+}
+
+#action-progress-indicator-placeholder {
+  display: none;
+}
+
+.progress-indicator {
+  animation: spin 1s linear infinite;
+  opacity: 1;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#page-components {
+  flex: 1;
+  overflow: auto;
+}
+
+.grid-layout {
+  display: grid;
+  height: 100%;
+  width: 100%;
+}
+
+#nav-panel {
+  margin-top: -4px;
+  width: 100%;
+}
+
+#control-panel {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  padding-top: 0.5rem;
+}
+
+#control-panel:not(:empty) {
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+.dashboard_title {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#nav-bar {
+  border-right: 1px solid var(--bs-border-color);
+  display: flex;
+  justify-content: flex-start;
+  max-width: 60px;
+  min-width: 60px;
+  padding-top: 4px;
+}
+
+#dashboard-container div[hidden] {
+  display: none;
+}
+
+#page-main {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: row;
+  height: calc(100vh - 64px);
+}
+
+#dashboard-title,
+#page-title {
+  margin: 0;
+}
+
+a:has(#logo),
+a:has(#logo-light),
+a:has(#logo-dark),
+#logo,
+#logo-light,
+#logo-dark {
+  height: 100%;
+}
+
+a:has(#logo-light),
+a:has(#logo-dark),
+#logo-dark,
+#logo-light {
+  display: none;
+}
+
+[data-bs-theme="dark"] a:has(#logo-dark),
+[data-bs-theme="dark"] #logo-dark {
+  align-items: center;
+  display: flex;
+}
+
+[data-bs-theme="light"] a:has(#logo-light),
+[data-bs-theme="light"] #logo-light {
+  align-items: center;
+  display: flex;
+}
+
+#collapse-icon.material-symbols-outlined {
+  background-color: var(--bs-tertiary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 50%;
+  color: var(--bs-tertiary-color);
+  cursor: pointer;
+  font-size: 26px;
+  position: absolute;
+}
+
+#collapse-icon.material-symbols-outlined:hover {
+  color: var(--bs-primary-text-emphasis);
+}
+
+#collapse-icon-outer {
+  display: flex;
+  justify-content: center;
+  padding-top: 22px;
+  width: 0;
+}
+
+/*
+Note: This is a temporary quick-fix to improve the mobile layout experience.
+In the long run, we should refactor our CSS and component structure to support proper responsive design.
+
+Current logic:
+1. Applies a flex layout with column direction to:
+   - Extra-small, small, and medium screen widths (≤ 768px)
+   - Large screen widths (≤ 1028px) *only when* the collapsible left panel is open
+
+2. Applies a zoom-out effect for very small screen widths and heights (≤ 576px)
+*/
+
+/* Apply flex layout for screens smaller than 768px */
+@media screen and (width <= 768px) {
+  .grid-layout {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+}
+
+/* Apply flex layout for screens up to 1028px if collapse-left-side is shown */
+@media screen and (width <= 1028px) {
+  #page-main:has(#collapse-left-side.show) .grid-layout {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+}
+
+/* Apply zoom-out on small screen sizes */
+@media screen and (width <= 576px), screen and (height <= 576px) {
+  #collapse-icon-outer {
+    padding-top: 16px;
+  }
+
+  #nav-control-panel {
+    padding-top: 16px;
+  }
+
+  #nav-bar {
+    padding-top: 4px;
+  }
+
+  #header,
+  #right-side,
+  #vizro-notifications {
+    zoom: 80%;
+  }
+}
+
+/* Apply specific styles for landscape orientation on small screen heights */
+@media screen and (height <= 576px) and (orientation: landscape) {
+  #nav-control-panel {
+    font-size: 12px;
+    width: 260px;
+  }
+
+  #nav-control-panel .accordion-button,
+  #nav-control-panel .form-label,
+  #nav-control-panel .form-check-label,
+  #nav-control-panel .mantine-DatePickerInput-input,
+  #nav-control-panel .slider-text-input-field,
+  #nav-control-panel div.Select--multi .Select-value {
+    font-size: 12px;
+  }
+
+  #nav-control-panel .rc-slider-tooltip-inner,
+  #nav-control-panel .rc-slider-mark-text {
+    font-size: 10px;
+  }
+
+  #nav-control-panel .mantine-DatePickerInput-input {
+    min-height: 40px;
+  }
+}
+
+@media screen and (width <= 576px) and (orientation: portrait) {
+  body:has(#collapse-left-side.show) {
+    overflow: hidden;
+  }
+
+  #nav-control-panel {
+    padding-top: 12px;
+    width: 280px;
+  }
+
+  #collapse-left-side.show:has(#nav-control-panel:not([hidden]))
+    ~ #collapse-icon-outer
+    #collapse-icon {
+    right: -7px;
+    z-index: 10;
+  }
+
+  #nav-bar {
+    padding-top: 0;
+  }
+
+  #left-side:has(#nav-control-panel:not([hidden])) {
+    height: calc(100vh - 40px);
+    position: absolute;
+    width: 100vw;
+    z-index: 5;
+    zoom: 100%;
+  }
+
+  /* If #nav-control-panel is NOT hidden, apply this rule */
+  #nav-control-panel:not([hidden]) {
+    flex: 1;
+  }
+}
+
+/* Hide Loading... text on loading page */
+._dash-loading {
+  display: none;
+}
+
+.checklist-inline {
+  align-items: baseline;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.btn-circular {
+  border-radius: 50%;
+  height: 24px;
+  width: 24px;
+}
+
+.card-wrapper {
+  display: block;
+}
+
+.card-header-outer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+.card-body-outer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.card-wrapper-actions > .card {
+  cursor: pointer;
+}
+
+.card-wrapper-actions > .card:hover {
+  border: 1px solid var(--bs-border-color);
+}
+
+#header-left .navbar-top {
+  border: none;
+  display: flex;
+  gap: 2rem;
+  padding: 0;
+  padding-left: 24px;
+}
+
+#header-left .navbar-top .nav-link {
+  border-bottom: 1px solid transparent;
+  font-size: 1rem;
+  padding: 0;
+  white-space: nowrap;
+  width: unset;
+}
+
+#header-left .navbar-top .nav-link:hover {
+  border-bottom: 1px solid var(--bs-primary) !important;
+}
+
+#header-left .navbar-top .nav-link:active,
+#header-left .navbar-top .nav-link.active {
+  border-bottom: 1px solid var(--bs-primary) !important;
+  color: var(--bs-primary) !important;
+}

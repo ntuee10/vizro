@@ -1,0 +1,86 @@
+from __future__ import annotations
+
+import itertools
+import warnings
+from typing import Annotated, Literal, cast
+
+import dash_bootstrap_components as dbc
+from dash import get_relative_path, html
+from pydantic import AfterValidator, Field, PrivateAttr
+
+from vizro.managers._model_manager import model_manager
+from vizro.models import VizroBaseModel
+from vizro.models._models_utils import _log_call, validate_icon
+from vizro.models._navigation._navigation_utils import _validate_pages
+from vizro.models._navigation.accordion import Accordion
+from vizro.models.types import NavPagesType
+
+
+class NavLink(VizroBaseModel):
+    """Icon that serves as a navigation link to be used in a [`NavBar`][vizro.models.NavBar].
+
+    Abstract: Usage documentation
+        [How to customize the NavBar icons](../user-guides/navigation.md#change-icons)
+
+    """
+
+    pages: Annotated[NavPagesType, AfterValidator(_validate_pages), Field(default=[])]
+    label: str = Field(description="Text description of the icon for use in tooltip.")
+    icon: Annotated[
+        str,
+        AfterValidator(validate_icon),
+        Field(default="", description="Icon name from Google Material icons library."),
+    ]
+    _nav_selector: Accordion = PrivateAttr()
+    _nav_position: Literal["left", "top"] = PrivateAttr(default="left")
+
+    @_log_call
+    def pre_build(self):
+        from vizro.models._navigation.accordion import Accordion
+
+        self._nav_selector = Accordion(pages=self.pages)  # type: ignore[arg-type]
+
+        if self.icon and self._nav_position == "top":
+            warnings.warn(
+                'Using the `icon` argument when `vm.NavBar(position="top")` is set is not currently supported. '
+                'Icons are only supported for `position="left"`.',
+                UserWarning,
+            )
+
+    @_log_call
+    def build(self, *, active_page_id=None):
+        # _nav_selector is an Accordion, so _nav_selector._pages is guaranteed to be dict[str, list[str]].
+        # `active_page_id` is still required here for the automatic opening of the Accordion when navigating
+        # from homepage to a page within the Accordion and there are several Accordions within the page.
+        from vizro.models import Page
+
+        all_page_ids = list(itertools.chain(*self._nav_selector.pages.values()))
+        first_page_id = all_page_ids[0]
+        item_active = active_page_id in all_page_ids
+        first_page = cast(Page, model_manager[first_page_id])
+
+        nav_link_children = (
+            [
+                html.Span(self.icon, className="material-symbols-outlined", id=f"{self.id}-tooltip-target"),
+                dbc.Tooltip(
+                    self.label,
+                    placement="right",
+                    target=f"{self.id}-tooltip-target",
+                ),
+            ]
+            if self._nav_position == "left"
+            else self.label
+        )
+        nav_link = dbc.NavLink(
+            nav_link_children,
+            id=self.id,
+            href=get_relative_path(first_page.path),
+            active=item_active,
+        )
+
+        # Only build the nav_selector (id="nav-panel") if the item is active.
+        if item_active:
+            return html.Div([nav_link, self._nav_selector.build(active_page_id=active_page_id)])
+
+        # html.Div required to access the nav_link via ID
+        return html.Div(nav_link)

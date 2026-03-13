@@ -1,0 +1,44 @@
+.ag-picker-field-wrapper {
+  background-color: var(--input-field-bg);
+  border-radius: 0;
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.ag-picker-field-wrapper.ag-picker-collapsed[aria-label="Page Size"] {
+  background-color: transparent !important;
+  box-shadow: none;
+}
+
+.ag-filter-apply-panel {
+  justify-content: flex-start;
+  padding: 0.5rem 0 0.75rem;
+}
+
+.ag-filter-condition {
+  justify-content: flex-start;
+  padding: 0.5rem 0.25rem;
+}
+
+.ag-input-field-input {
+  background-color: var(--input-field-bg);
+  box-shadow: var(--bs-box-shadow-sm);
+}
+
+.ag-header-cell {
+  border-bottom: 1px solid transparent;
+}
+
+.ag-header-cell:hover {
+  border-bottom: 1px solid var(--bs-primary);
+  color: var(--bs-primary);
+}
+
+[data-bs-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+.ag-select-list,
+[id^="ag-select-list-"] {
+  max-height: 150px !important;
+  overflow: auto;
+}

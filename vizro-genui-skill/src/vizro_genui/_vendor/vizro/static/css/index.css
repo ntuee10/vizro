@@ -1,0 +1,15 @@
+@font-face {
+  font-family: Inter;
+  src: url("./fonts/inter-variable-font.ttf") format("truetype");
+}
+
+/* Box sizing rules: https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
